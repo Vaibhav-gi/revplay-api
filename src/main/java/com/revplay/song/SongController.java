@@ -2,7 +2,10 @@ package com.revplay.song;
 
 import com.revplay.song.dto.SongResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,4 +42,17 @@ public class SongController {
         return ResponseEntity.ok(response);
 
     }
+
+    @GetMapping("/stream/{id}")
+    public ResponseEntity<Resource> streamSong(@PathVariable Long id) {
+
+        Resource resource = songService.streamSong(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + resource.getFilename() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
 }

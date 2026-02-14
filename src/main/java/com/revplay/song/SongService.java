@@ -5,6 +5,8 @@ import com.revplay.song.dto.SongResponse;
 import com.revplay.user.RpUser;
 import com.revplay.user.RpUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,6 @@ public class SongService {
                                    MultipartFile audioFile)
             throws IOException {
 
-        // 1️⃣ Get logged-in user
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -42,21 +43,19 @@ public class SongService {
             throw new RuntimeException("User is not an artist");
         }
 
-        // 2️⃣ Validate file
         if (audioFile == null || audioFile.isEmpty()) {
             throw new RuntimeException("Audio file is required");
         }
 
-        // 3️⃣ Generate unique filename
-        String fileName = System.currentTimeMillis() + "_" +
-                audioFile.getOriginalFilename();
+        // Sanitize filename
+        String originalName = audioFile.getOriginalFilename();
+        String cleanFileName = System.currentTimeMillis() + "_" +
+                originalName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 
-        // 4️⃣ Get upload directory from properties
         String audioPath = fileStorageProperties.getAudioPath();
 
         File uploadDir = new File(audioPath);
 
-        // 5️⃣ Create directory if it doesn't exist
         if (!uploadDir.exists()) {
             boolean created = uploadDir.mkdirs();
             if (!created) {
@@ -64,26 +63,22 @@ public class SongService {
             }
         }
 
-        // 6️⃣ Create destination file safely
-        File destination = new File(uploadDir, fileName);
+        File destination = new File(uploadDir, cleanFileName);
 
-        // 7️⃣ Save file
         audioFile.transferTo(destination);
 
-        // 8️⃣ Save song entity
         Song song = Song.builder()
                 .title(title)
                 .genre(genre)
                 .duration(duration)
                 .releaseDate(releaseDate)
-                .audioPath(fileName)
+                .audioPath(cleanFileName)
                 .artist(artist)
                 .playCount(0L)
                 .build();
 
         Song saved = songRepository.save(song);
 
-        // 9️⃣ Return DTO
         return SongResponse.builder()
                 .id(saved.getId())
                 .title(saved.getTitle())
@@ -93,5 +88,24 @@ public class SongService {
                 .releaseDate(saved.getReleaseDate())
                 .playCount(saved.getPlayCount())
                 .build();
+    }
+
+    public Resource streamSong(Long songId) {
+
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new RuntimeException("Song not found"));
+
+        String audioPath = fileStorageProperties.getAudioPath();
+
+        File file = new File(audioPath, song.getAudioPath());
+
+        if (!file.exists()) {
+            throw new RuntimeException("Audio file not found on disk");
+        }
+
+        song.setPlayCount(song.getPlayCount() + 1);
+        songRepository.save(song);
+
+        return new FileSystemResource(file);
     }
 }
