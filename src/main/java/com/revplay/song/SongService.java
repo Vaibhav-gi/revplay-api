@@ -131,4 +131,24 @@ public class SongService {
         );
     }
 
+    public Page<SongResponse> searchSongs(String keyword, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Song> songPage =
+                songRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+
+        return songPage.map(song ->
+                SongResponse.builder()
+                        .id(song.getId())
+                        .title(song.getTitle())
+                        .genre(song.getGenre())
+                        .duration(song.getDuration())
+                        .artistName(song.getArtist().getUsername())
+                        .releaseDate(song.getReleaseDate())
+                        .playCount(song.getPlayCount())
+                        .build()
+        );
+    }
+
 }

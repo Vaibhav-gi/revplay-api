@@ -68,4 +68,17 @@ public class SongController {
         return ResponseEntity.ok(songs);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<SongResponse>> searchSongs(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+
+        Page<SongResponse> songs =
+                songService.searchSongs(keyword, page, size);
+
+        return ResponseEntity.ok(songs);
+    }
+
 }
