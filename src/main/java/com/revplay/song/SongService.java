@@ -7,6 +7,9 @@ import com.revplay.user.RpUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -108,4 +111,24 @@ public class SongService {
 
         return new FileSystemResource(file);
     }
+
+    public Page<SongResponse> getAllSongs(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Song> songPage = songRepository.findAll(pageable);
+
+        return songPage.map(song ->
+                SongResponse.builder()
+                        .id(song.getId())
+                        .title(song.getTitle())
+                        .genre(song.getGenre())
+                        .duration(song.getDuration())
+                        .artistName(song.getArtist().getUsername())
+                        .releaseDate(song.getReleaseDate())
+                        .playCount(song.getPlayCount())
+                        .build()
+        );
+    }
+
 }

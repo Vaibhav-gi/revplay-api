@@ -3,6 +3,7 @@ package com.revplay.song;
 import com.revplay.song.dto.SongResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -53,6 +54,18 @@ public class SongController {
                         "inline; filename=\"" + resource.getFilename() + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<SongResponse>> getAllSongs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+
+        Page<SongResponse> songs =
+                songService.getAllSongs(page, size);
+
+        return ResponseEntity.ok(songs);
     }
 
 }
