@@ -81,4 +81,27 @@ public class SongController {
         return ResponseEntity.ok(songs);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<Page<SongResponse>> filterSongs(
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) Integer releaseYear,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sort
+    ) {
+
+        Page<SongResponse> songs =
+                songService.filterSongs(
+                        genre,
+                        artist,
+                        releaseYear,
+                        page,
+                        size,
+                        sort
+                );
+
+        return ResponseEntity.ok(songs);
+    }
+
 }

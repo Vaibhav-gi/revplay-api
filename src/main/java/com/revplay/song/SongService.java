@@ -10,6 +10,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -137,6 +139,42 @@ public class SongService {
 
         Page<Song> songPage =
                 songRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+
+        return songPage.map(song ->
+                SongResponse.builder()
+                        .id(song.getId())
+                        .title(song.getTitle())
+                        .genre(song.getGenre())
+                        .duration(song.getDuration())
+                        .artistName(song.getArtist().getUsername())
+                        .releaseDate(song.getReleaseDate())
+                        .playCount(song.getPlayCount())
+                        .build()
+        );
+    }
+
+    public Page<SongResponse> filterSongs(
+            String genre,
+            String artist,
+            Integer releaseYear,
+            int page,
+            int size,
+            String sort
+    ) {
+
+        Sort sorting = Sort.by("id").ascending();
+
+        if ("popular".equalsIgnoreCase(sort)) {
+            sorting = Sort.by("playCount").descending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sorting);
+
+        Specification<Song> specification =
+                SongSpecification.filterBy(genre, artist, releaseYear);
+
+        Page<Song> songPage =
+                songRepository.findAll(specification, pageable);
 
         return songPage.map(song ->
                 SongResponse.builder()
