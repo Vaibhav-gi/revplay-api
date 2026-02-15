@@ -7,9 +7,5 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/artist")
 public class ArtistController {
 
-    @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ARTIST')")
-    public String artistDashboard() {
-        return "Artist Dashboard";
-    }
+
 }

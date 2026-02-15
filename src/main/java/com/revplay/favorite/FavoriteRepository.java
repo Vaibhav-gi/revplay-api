@@ -18,4 +18,5 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
         WHERE f.song.artist.id = :artistId
     """)
     Long countFavoritesForArtist(@Param("artistId") Long artistId);
+
 }
