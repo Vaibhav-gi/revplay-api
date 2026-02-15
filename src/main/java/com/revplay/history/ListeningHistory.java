@@ -20,10 +20,10 @@ public class ListeningHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private RpUser user;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Song song;
 
     private LocalDateTime playedAt;

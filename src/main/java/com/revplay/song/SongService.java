@@ -1,6 +1,7 @@
 package com.revplay.song;
 
 import com.revplay.config.FileStorageProperties;
+import com.revplay.history.ListeningHistoryService;
 import com.revplay.song.dto.SongResponse;
 import com.revplay.user.RpUser;
 import com.revplay.user.RpUserRepository;
@@ -28,6 +29,7 @@ public class SongService {
     private final SongRepository songRepository;
     private final RpUserRepository userRepository;
     private final FileStorageProperties fileStorageProperties;
+    private final ListeningHistoryService listeningHistoryService;
 
     public SongResponse uploadSong(String title,
                                    String genre,
@@ -110,6 +112,8 @@ public class SongService {
 
         song.setPlayCount(song.getPlayCount() + 1);
         songRepository.save(song);
+
+        listeningHistoryService.recordPlay(songId);
 
         return new FileSystemResource(file);
     }
