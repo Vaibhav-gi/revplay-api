@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface SongRepository extends JpaRepository<Song, Long>, JpaSpecificationExecutor<Song> {
 
-    List<Song> findByArtistId(Long artistId);
+    List<Song> findByArtist_Id(Long artistId);
 
     List<Song> findByTitleContainingIgnoreCase(String keyword);
 
@@ -24,5 +24,11 @@ public interface SongRepository extends JpaRepository<Song, Long>, JpaSpecificat
 
     List<Song> findTop5ByArtistIdOrderByPlayCountDesc(Long artistId);
 
+    Page<Song> findByVisibility(SongVisibility visibility, Pageable pageable);
 
+    Page<Song> findByTitleContainingIgnoreCaseAndVisibility(
+            String keyword,
+            SongVisibility visibility,
+            Pageable pageable
+    );
 }

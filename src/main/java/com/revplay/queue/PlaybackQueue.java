@@ -1,4 +1,4 @@
-package com.revplay.history;
+package com.revplay.queue;
 
 import com.revplay.song.Song;
 import com.revplay.user.RpUser;
@@ -8,17 +8,21 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "listening_history")
+@Table(name = "playback_queue")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ListeningHistory {
+public class PlaybackQueue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private int position;
+
+    private LocalDateTime addedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -27,6 +31,4 @@ public class ListeningHistory {
     @ManyToOne
     @JoinColumn(name = "song_id")
     private Song song;
-
-    private LocalDateTime playedAt;
 }

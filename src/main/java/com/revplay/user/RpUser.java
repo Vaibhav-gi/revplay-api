@@ -31,6 +31,8 @@ public class RpUser {
 
     private String bio;
 
+    private String genre;
+
     private String profileImage;
 
     @Enumerated(EnumType.STRING)

@@ -5,12 +5,12 @@ import com.revplay.song.SongRepository;
 import com.revplay.user.RpUser;
 import com.revplay.user.RpUserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,19 +20,18 @@ public class ListeningHistoryService {
     private final RpUserRepository userRepository;
     private final SongRepository songRepository;
 
-    @Transactional
     public void recordPlay(Long songId) {
 
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
 
         RpUser user = userRepository.findByUsername(username)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Song song = songRepository.findById(songId)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Song not found"));
 
         ListeningHistory history = ListeningHistory.builder()
                 .user(user)
@@ -43,34 +42,44 @@ public class ListeningHistoryService {
         historyRepository.save(history);
     }
 
-    public Object getRecentHistory() {
+    public List<ListeningHistory> getRecentHistory() {
 
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
 
         RpUser user = userRepository.findByUsername(username)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         return historyRepository
-                .findByUserOrderByPlayedAtDesc(
-                        user,
-                        PageRequest.of(0, 50)
-                );
+                .findTop50ByUser_IdOrderByPlayedAtDesc(user.getId());
     }
 
-    @Transactional
-    public void clearHistory() {
+    public List<ListeningHistory> getFullHistory() {
 
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
 
         RpUser user = userRepository.findByUsername(username)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        historyRepository.deleteByUser(user);
+        return historyRepository
+                .findByUser_IdOrderByPlayedAtDesc(user.getId());
+    }
+
+    public void clearHistory() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        RpUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        historyRepository.deleteByUser_Id(user.getId());
     }
 }

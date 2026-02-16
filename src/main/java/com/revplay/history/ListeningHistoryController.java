@@ -12,14 +12,20 @@ public class ListeningHistoryController {
 
     private final ListeningHistoryService historyService;
 
-    @GetMapping
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getHistory() {
+    @GetMapping("/recent")
+    @PreAuthorize("hasRole('USER') or hasRole('ARTIST')")
+    public ResponseEntity<?> getRecentHistory() {
         return ResponseEntity.ok(historyService.getRecentHistory());
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('USER') or hasRole('ARTIST')")
+    public ResponseEntity<?> getFullHistory() {
+        return ResponseEntity.ok(historyService.getFullHistory());
+    }
+
     @DeleteMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ARTIST')")
     public ResponseEntity<?> clearHistory() {
         historyService.clearHistory();
         return ResponseEntity.ok("History cleared");

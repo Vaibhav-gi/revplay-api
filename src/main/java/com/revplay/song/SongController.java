@@ -1,6 +1,7 @@
 package com.revplay.song;
 
 import com.revplay.song.dto.SongResponse;
+import com.revplay.song.dto.UpdateSongRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -102,6 +103,16 @@ public class SongController {
                 );
 
         return ResponseEntity.ok(songs);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ARTIST')")
+    public ResponseEntity<?> updateSong(
+            @PathVariable Long id,
+            @RequestBody UpdateSongRequest request
+    ) {
+        songService.updateSong(id, request);
+        return ResponseEntity.ok("Song updated successfully");
     }
 
 }
